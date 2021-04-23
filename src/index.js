@@ -1,3 +1,5 @@
+import pawnMoveStrategy from './piece-move-strategies/pawn.js';
+
 const state = {
 };
 
@@ -36,23 +38,69 @@ const initBoardPieces = col => {
     state['h'][rankPawns] = `${col}ph`;
 };
 
-const processMove = (mv) => {
+const getMoveData = (mv, col) => {
+    const mvPadded = mv.length < 3 ? `p${mv}` : mv;
+    return {
+        pieceType: mvPadded[0],
+        file: mvPadded[1],
+        rank: parseInt(mvPadded[2]),
+        col: col
+    };
+};
+
+const tryGetPieceData = mvData => {
+    if (mvData.pieceType == 'p') {
+        return pawnMoveStrategy(state, mvData);
+    }
+    return null;
+};
+
+const processMove = (mv, col) => {
 
     // split the 2 moves (in the turn)
     // for ea mv
         // color = mv is 1st ? w : b
-        // { type, rank, file } = getMoveData(mv);
+        // { pieceType, rank, file } = getMoveData(mv);
 
-        const pieceId = getPieceId(mv);
+        const mvData = getMoveData(mv, col);
+
+        /* const pieceId = getPieceId(mv);
         if (!pieceId)
             throw new Error('Piece ID not found');
+        */
+        const pieceData = tryGetPieceData(mvData);
+        if (!pieceData)
+            throw new Error(`Piece not found for move data: ${JSON.stringify(mvData)}`);
 
         // Update id for square in state
+        state[mvData.file][mvData.rank] = pieceData.pieceId;
+
         // Clear id for square in state
+        state[pieceData.file][pieceData.rank] = null;
+};
+
+const cvtNotationToArray = notation => {
+    return notation
+        .replace(/\d\.\s/g, '')
+        .split(' ');
 };
 
 initEmptyBoard();
 initBoardPieces('w');
 initBoardPieces('b');
 
-const notation = 'e4';
+
+
+const moves = cvtNotationToArray('1. e4 e5');
+
+console.log(moves);
+
+for (let t = 1; t < moves.length + 1; t++) {
+    const col = t % 2 === 1 ? 'w' : 'b';
+
+    console.log(col);
+
+    processMove(moves[t - 1], col);
+}
+
+console.log(state);
