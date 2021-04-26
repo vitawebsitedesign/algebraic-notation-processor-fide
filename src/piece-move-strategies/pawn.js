@@ -1,6 +1,6 @@
-const strat = (state, mvData) => {
+export default (squares, mvData) => {
     const dir = mvData.col === 'w' ? -1 : 1;
-    const squares = [
+    const peekSquares = [
         {
             file: mvData.file,
             rank: mvData.rank + (1 * dir)
@@ -11,17 +11,15 @@ const strat = (state, mvData) => {
         }
     ];
 
-    for (let square of squares) {
-        const id = state[square.file][square.rank];
+    for (let peekSquare of peekSquares) {
+        const id = squares[peekSquare.file][peekSquare.rank];
         if (id)
             return {
                 pieceId: id,
-                file: square.file,
-                rank: square.rank
+                file: peekSquare.file,
+                rank: peekSquare.rank
             };
     }
 
     return null;
 };
-
-export default strat;
